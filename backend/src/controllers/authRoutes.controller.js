@@ -86,7 +86,7 @@ export const logout = async (req, res) => {
 export const updateProfile = async (req, res) => {
     try {
         const { image } = req.body
-        if(!image) return res.status(400).json({ message: "image is required" })
+        if (!image) return res.status(400).json({ message: "image is required" })
         const user = await User.findById(req.user._id)
         if (user.profile) {
             const publicId = user.profile.split("/").pop().split("")[0]
