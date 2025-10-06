@@ -45,8 +45,20 @@ const ChatSelected = ({ onBackClick }) => {
         scrollToBottom()
     }, [messages])
 
+    // Enhanced scroll to bottom function
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+        if (messagesContainerRef.current) {
+            const container = messagesContainerRef.current
+            
+            // Scroll to absolute bottom with extra space
+            container.scrollTo({
+                top: container.scrollHeight + 100, // Extra 100px padding
+                behavior: 'smooth'
+            })
+        }
+        
+        // Fallback
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
     }
 
     // Handle input focus - scroll to bottom with delay for keyboard animation
@@ -101,7 +113,7 @@ const ChatSelected = ({ onBackClick }) => {
         setImagePreview(null)
     }
 
-    // Send message function
+    // Enhanced send message function
     const handleSendMessage = async () => {
         if (!selectedUser?._id || isSending) return
 
@@ -118,6 +130,12 @@ const ChatSelected = ({ onBackClick }) => {
                 await sendMessage(selectedUser._id, message.trim())
                 setMessage('')
             }
+            
+            // Scroll to bottom after sending with multiple attempts
+            setTimeout(() => scrollToBottom(), 100)
+            setTimeout(() => scrollToBottom(), 300)
+            setTimeout(() => scrollToBottom(), 500)
+            
         } catch (error) {
             console.error('Error sending message:', error)
         } finally {
@@ -157,7 +175,7 @@ const ChatSelected = ({ onBackClick }) => {
 
     return (
         <>
-            {/* CSS for mobile keyboard fix */}
+            {/* Enhanced CSS for mobile keyboard fix */}
             <style>{`
                 /* Use dynamic viewport height */
                 .chat-container {
@@ -179,6 +197,8 @@ const ChatSelected = ({ onBackClick }) => {
                         overflow-y: auto;
                         -webkit-overflow-scrolling: touch;
                         overscroll-behavior: contain;
+                        /* Add enough padding to keep messages above input */
+                        padding-bottom: 140px !important;
                     }
                     
                     /* Ensure input area stays visible */
@@ -187,6 +207,18 @@ const ChatSelected = ({ onBackClick }) => {
                         bottom: 0;
                         background: #202C33;
                         z-index: 1000;
+                        box-shadow: 0 -4px 8px rgba(0,0,0,0.3);
+                    }
+                    
+                    /* Add margin to last message */
+                    .messages-container .space-y-4 > div:last-child {
+                        margin-bottom: 20px;
+                    }
+                }
+                
+                @media (min-width: 769px) {
+                    .messages-container {
+                        padding-bottom: 24px;
                     }
                 }
             `}</style>
@@ -248,13 +280,14 @@ const ChatSelected = ({ onBackClick }) => {
                     </div>
                 </div>
 
-                {/* Messages Container - Updated with proper flex and scroll */}
+                {/* Messages Container - Enhanced with proper padding */}
                 <div
                     ref={messagesContainerRef}
                     className="messages-container flex-1 px-4 py-6"
                     style={{
                         minHeight: '0',
                         overflowY: 'auto',
+                        paddingBottom: isMobile ? '120px' : '24px',
                         backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
                         backgroundSize: '30px 30px'
                     }}
@@ -303,6 +336,7 @@ const ChatSelected = ({ onBackClick }) => {
                                                 color: 'white'
                                             }}
                                         >
+                                            {/* Handle both text and image messages */}
                                             {msg.image ? (
                                                 <div className="mb-2">
                                                     <img
@@ -366,6 +400,9 @@ const ChatSelected = ({ onBackClick }) => {
                                 </div>
                             </div>
                         )}
+                        
+                        {/* Extra spacing at the bottom for mobile */}
+                        <div style={{ height: isMobile ? '60px' : '20px' }} />
                     </div>
 
                     <div ref={messagesEndRef} />
@@ -399,7 +436,7 @@ const ChatSelected = ({ onBackClick }) => {
                     </div>
                 )}
 
-                {/* Message Input Area - Fixed with sticky positioning */}
+                {/* Message Input Area - Enhanced with sticky positioning */}
                 <div
                     ref={messageInputRef}
                     className="input-area flex-shrink-0 p-4 border-t border-gray-700"
