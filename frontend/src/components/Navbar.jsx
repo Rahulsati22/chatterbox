@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Menu, X, User, Users, LogOut, LogIn, UserPlus, Settings, ChevronDown } from 'lucide-react'
+import { Menu, X, User, Users, LogOut, LogIn, UserPlus, Settings, ChevronDown, Gamepad } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useUserStore } from '../stores/useUserStore'
 
@@ -105,11 +105,11 @@ const Navbar = () => {
 
                             {/* Settings Link - Available for all users */}
                             <Link
-                                to="/settings"
+                                to="/games"
                                 className="flex items-center space-x-2 text-gray-100 hover:text-white hover:bg-black hover:bg-opacity-20 px-3 py-2 rounded-lg transition-all duration-200"
                             >
-                                <Settings size={18} />
-                                <span>Settings</span>
+                                <Gamepad size={18} />
+                                <span>Games</span>
                             </Link>
 
                             {userAuth ? (
@@ -141,7 +141,7 @@ const Navbar = () => {
                                                 {/* Online Status Indicator */}
                                                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
                                             </div>
-                                            
+
                                             {/* User Name */}
                                             <div className="flex flex-col items-start">
                                                 <span className="font-medium text-sm leading-none">
@@ -151,10 +151,10 @@ const Navbar = () => {
                                                     Online
                                                 </span>
                                             </div>
-                                            
+
                                             {/* Dropdown Arrow */}
-                                            <ChevronDown 
-                                                size={16} 
+                                            <ChevronDown
+                                                size={16}
                                                 className={`transition-transform duration-200 ${profileDropdown ? 'rotate-180' : ''}`}
                                             />
                                         </button>
@@ -163,8 +163,8 @@ const Navbar = () => {
                                         {profileDropdown && (
                                             <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
                                                 {/* User Info Header with Big Image */}
-                                                <div className="px-6 py-6 text-center" style={{ 
-                                                    background: 'linear-gradient(135deg, #DCF8C6 0%, #B8E6B8 100%)' 
+                                                <div className="px-6 py-6 text-center" style={{
+                                                    background: 'linear-gradient(135deg, #DCF8C6 0%, #B8E6B8 100%)'
                                                 }}>
                                                     <div className="flex flex-col items-center space-y-4">
                                                         {/* Big Profile Picture - Enhanced */}
@@ -190,7 +190,7 @@ const Navbar = () => {
                                                                 <div className="w-3 h-3 bg-green-600 rounded-full"></div>
                                                             </div>
                                                         </div>
-                                                        
+
                                                         {/* User Details */}
                                                         <div className="text-center">
                                                             <h3 className="font-bold text-xl text-gray-800 mb-1">
@@ -222,9 +222,9 @@ const Navbar = () => {
                                                             <p className="text-sm text-gray-500">See your profile details</p>
                                                         </div>
                                                     </Link>
-                                                    
+
                                                     <Link
-                                                        to="/settings"
+                                                        to="/games"
                                                         onClick={() => setProfileDropdown(false)}
                                                         className="flex items-center space-x-4 px-6 py-3 text-gray-700 hover:bg-gray-50 transition-all duration-200 group"
                                                     >
@@ -232,13 +232,13 @@ const Navbar = () => {
                                                             <Settings size={20} className="text-gray-600" />
                                                         </div>
                                                         <div>
-                                                            <span className="font-medium">Settings</span>
-                                                            <p className="text-sm text-gray-500">Manage your preferences</p>
+                                                            <span className="font-medium">Games</span>
+                                                            <p className="text-sm text-gray-500">Play Games</p>
                                                         </div>
                                                     </Link>
-                                                    
+
                                                     <hr className="my-2 mx-4" />
-                                                    
+
                                                     <button
                                                         onClick={handleSignOut}
                                                         className="flex items-center space-x-4 px-6 py-3 text-red-600 hover:bg-red-50 transition-all duration-200 w-full text-left group"
@@ -350,12 +350,12 @@ const Navbar = () => {
 
                     {/* Settings Link - Mobile */}
                     <Link
-                        to="/settings"
+                        to="/games"
                         onClick={handleSettingsClick}
                         className="flex items-center space-x-3 text-gray-100 hover:text-white hover:bg-black hover:bg-opacity-30 px-3 py-3 rounded-lg transition-all duration-200 w-full"
                     >
                         <Settings size={20} />
-                        <span>Settings</span>
+                        <span>Games</span>
                     </Link>
 
                     {userAuth ? (

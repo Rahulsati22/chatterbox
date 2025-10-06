@@ -80,7 +80,9 @@ export const sendMessage = async (req, res) => {
 
 
 
-        return res.status(200).json({ messages, message: "message sent successfully" })
+        
+        const messageAll = await Message.find({ $or: [{ senderId: req.user._id, receiverId: req.params.id }, { senderId: req.params.id, receiverId: req.user._id }] })
+        return res.status(200).json({ messages: messageAll, message: "message sent successfully" })
     } catch (error) {
         console.log("error in send message", error.message)
         return res.status(500).json({ message: error.message })

@@ -8,6 +8,7 @@ const useUserStore = create((set, get) => ({
     signuploading: false,
     signinloading: false,
     checkingAuth: true,
+    onlineUsers : [],
 
     signup: async ({ name, email, password, image }) => {
         try {
@@ -62,6 +63,17 @@ const useUserStore = create((set, get) => ({
         } catch (error) {
             console.log("error in logout")
             toast.error(error.message || 'something went wrong')
+        }
+    },
+
+    saveProfile: async (image) => {
+        try {
+            const response = await axios2.put('/auth/updateprofile', { image })
+            set({ userAuth: response.data.user })
+            toast.success("profile updated successfully")
+        } catch (error) {
+            console.log("error in saving profile")
+            toast.error(error.response.data.message || 'something went wrong')
         }
     }
 }))
