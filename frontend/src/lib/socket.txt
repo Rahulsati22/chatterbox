@@ -1,0 +1,7 @@
+1. Install socket for backend
+2. Install socket for frontend
+3. In backend create socket server in lib/socket.js
+4. In index.js make required changes
+5. Now go the frontend
+6. In frontend while logging in connect the socket, code in store/userAuth.js
+7. In frontend while logging out disconnect the socket, code in store/userAuth.js 

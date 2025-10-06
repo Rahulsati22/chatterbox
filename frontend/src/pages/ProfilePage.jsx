@@ -7,7 +7,6 @@ import {
 import { Link } from 'react-router-dom'
 import { useUserStore } from '../stores/useUserStore'
 import Loader from '../components/Loader'
-import { set } from 'mongoose'
 
 const Profile = () => {
   const { userAuth, saveProfile } = useUserStore()
@@ -53,7 +52,9 @@ const Profile = () => {
       setUploading(true)
       await saveProfile(previewImage)
       setUploading(false)
-      console.log(previewImage)
+       
+      setShowImageModal(false)
+      setPreviewImage(null)
     }
   }
 
@@ -63,12 +64,9 @@ const Profile = () => {
     setEditData({ ...editData, [name]: value })
   }
 
-
-
-
   return (
     <div
-      className="min-h-screen py-8 px-4 mt-0"
+      className="min-h-screen pt-20 pb-6 px-3 sm:px-4 lg:px-6"
       style={{
         backgroundColor: '#1a1a1a',
         backgroundImage: 'radial-gradient(circle at 25% 25%, #075E54 0%, transparent 50%), radial-gradient(circle at 75% 75%, #128C7E 0%, transparent 50%)',
@@ -76,29 +74,29 @@ const Profile = () => {
       }}
     >
       <div className="max-w-2xl mx-auto relative z-10">
-        {/* Main Profile Card - Dark Theme */}
+        {/* Main Profile Card - Responsive */}
         <div
-          className="rounded-3xl shadow-2xl border overflow-hidden"
+          className="rounded-2xl sm:rounded-3xl shadow-2xl border overflow-hidden"
           style={{
             backgroundColor: '#2a2a2a',
             borderColor: '#3a3a3a'
           }}
         >
-          {/* Header */}
-          <div className="text-center px-8 py-8">
-            <h1 className="text-2xl font-bold text-white mb-2">Profile</h1>
-            <p className="text-gray-400 text-sm">Your profile information</p>
+          {/* Header - Responsive padding */}
+          <div className="text-center px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            <h1 className="text-xl sm:text-2xl font-bold text-white mb-2">Profile</h1>
+            <p className="text-gray-400 text-xs sm:text-sm">Your profile information</p>
           </div>
 
-          {/* Profile Picture Section */}
-          <div className="px-8 pb-6">
-            <div className="text-center mb-8">
+          {/* Profile Picture Section - Responsive */}
+          <div className="px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6">
+            <div className="text-center mb-6 sm:mb-8">
               <div
                 className="relative inline-block cursor-pointer transform transition-transform duration-200 hover:scale-105"
                 onClick={() => setShowImageModal(true)}
               >
-                <div className="w-32 h-32 rounded-full border-4 border-teal-400 shadow-2xl overflow-hidden mx-auto relative">
-                  {userAuth.profile ? (
+                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-3 sm:border-4 border-teal-400 shadow-2xl overflow-hidden mx-auto relative">
+                  {userAuth?.profile ? (
                     <img
                       src={userAuth.profile}
                       alt="Profile"
@@ -109,37 +107,37 @@ const Profile = () => {
                       className="w-full h-full flex items-center justify-center"
                       style={{ backgroundColor: '#25D366' }}
                     >
-                      <User size={50} className="text-white" />
+                      <User size={window.innerWidth < 640 ? 36 : 50} className="text-white" />
                     </div>
                   )}
 
                   {/* Camera Overlay */}
                   <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200">
-                    <Camera className="w-8 h-8 text-white" />
+                    <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </div>
                 </div>
 
-                {/* Camera Icon Badge */}
+                {/* Camera Icon Badge - Responsive */}
                 <div
-                  className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full border-3 border-gray-700 flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform"
+                  className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 sm:border-3 border-gray-700 flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform"
                   style={{ backgroundColor: '#25D366' }}
                 >
-                  <Camera className="w-5 h-5 text-white" />
+                  <Camera className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
               </div>
 
-              <p className="text-gray-400 text-sm mt-4">
+              <p className="text-gray-400 text-xs sm:text-sm mt-3 sm:mt-4 px-4">
                 Click the camera icon to update your photo
               </p>
             </div>
 
-            {/* Form Fields */}
-            <div className="space-y-6">
+            {/* Form Fields - Responsive spacing */}
+            <div className="space-y-4 sm:space-y-6">
               {/* Full Name */}
               <div>
-                <div className="flex items-center mb-3">
+                <div className="flex items-center mb-2 sm:mb-3">
                   <User className="w-4 h-4 text-gray-400 mr-2" />
-                  <label className="text-gray-400 text-sm font-medium">Full Name</label>
+                  <label className="text-gray-400 text-xs sm:text-sm font-medium">Full Name</label>
                 </div>
                 <div className="relative">
                   <input
@@ -148,22 +146,20 @@ const Profile = () => {
                     readOnly={!isEditing}
                     onChange={(e) => isEditing && handleEditChange(e)}
                     name="name"
-                    className="w-full px-4 py-4 rounded-xl border text-white text-lg focus:outline-none focus:ring-2 transition-all duration-200"
+                    className="w-full px-3 sm:px-4 py-3 sm:py-4 rounded-lg sm:rounded-xl border text-white text-base sm:text-lg focus:outline-none focus:ring-2 transition-all duration-200"
                     style={{
                       backgroundColor: '#3a3a3a',
-                      borderColor: '#4a4a4a',
-                      focusRingColor: '#25D366'
+                      borderColor: '#4a4a4a'
                     }}
                   />
-
                 </div>
               </div>
 
               {/* Email Address */}
               <div>
-                <div className="flex items-center mb-3">
+                <div className="flex items-center mb-2 sm:mb-3">
                   <Mail className="w-4 h-4 text-gray-400 mr-2" />
-                  <label className="text-gray-400 text-sm font-medium">Email Address</label>
+                  <label className="text-gray-400 text-xs sm:text-sm font-medium">Email Address</label>
                 </div>
                 <input
                   type="email"
@@ -171,7 +167,7 @@ const Profile = () => {
                   readOnly={!isEditing}
                   onChange={(e) => isEditing && handleEditChange(e)}
                   name="email"
-                  className="w-full px-4 py-4 rounded-xl border text-white text-lg focus:outline-none focus:ring-2 transition-all duration-200"
+                  className="w-full px-3 sm:px-4 py-3 sm:py-4 rounded-lg sm:rounded-xl border text-white text-base sm:text-lg focus:outline-none focus:ring-2 transition-all duration-200"
                   style={{
                     backgroundColor: '#3a3a3a',
                     borderColor: '#4a4a4a'
@@ -180,29 +176,29 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Account Information */}
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold text-white mb-4">Account Information</h3>
+            {/* Account Information - Responsive */}
+            <div className="mt-6 sm:mt-8">
+              <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Account Information</h3>
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {/* Member Since */}
-                <div className="flex justify-between items-center py-3 border-b border-gray-700">
-                  <div className="flex items-center space-x-3">
-                    <Calendar className="w-5 h-5 text-gray-400" />
-                    <span className="text-gray-300">Member Since</span>
+                <div className="flex justify-between items-center py-2 sm:py-3 border-b border-gray-700">
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                    <span className="text-gray-300 text-sm sm:text-base">Member Since</span>
                   </div>
-                  <span className="text-white font-medium">{userProfile.joinedDate}</span>
+                  <span className="text-white font-medium text-sm sm:text-base">{userProfile.joinedDate}</span>
                 </div>
 
                 {/* Account Status */}
-                <div className="flex justify-between items-center py-3">
-                  <div className="flex items-center space-x-3">
-                    <Shield className="w-5 h-5 text-gray-400" />
-                    <span className="text-gray-300">Account Status</span>
+                <div className="flex justify-between items-center py-2 sm:py-3">
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                    <span className="text-gray-300 text-sm sm:text-base">Account Status</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: '#25D366' }}></div>
-                    <span className="text-green-400 font-medium">Active</span>
+                    <span className="text-green-400 font-medium text-sm sm:text-base">Active</span>
                   </div>
                 </div>
               </div>
@@ -211,33 +207,45 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* Profile Picture Modal - Dark Theme */}
+      {/* Profile Picture Modal - PERFECT POSITIONING */}
       {showImageModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-90"
+          style={{ 
+            padding: '16px', // Consistent padding on all sides
+            backdropFilter: 'blur(4px)' // Better visual effect
+          }}
+        >
+          {/* Modal Container with Perfect Centering */}
           <div
-            className="rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-            style={{ backgroundColor: '#2a2a2a' }}
+            className="relative w-full max-w-lg mx-auto bg-gray-800 rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto"
+            style={{ 
+              backgroundColor: '#2a2a2a',
+              transform: 'translateY(0)', // Ensures perfect centering
+              margin: 'auto' // Additional centering
+            }}
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-700">
-              <h2 className="text-2xl font-bold text-white">Update Profile Picture</h2>
+            <div className="sticky top-0 z-10 flex items-center justify-between p-6 border-b border-gray-700 bg-gray-800 rounded-t-2xl"
+                 style={{ backgroundColor: '#2a2a2a' }}>
+              <h2 className="text-xl font-bold text-white">Update Profile Picture</h2>
               <button
                 onClick={() => {
                   setShowImageModal(false)
                   setPreviewImage(null)
                 }}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="p-2 hover:bg-gray-700 rounded-full transition-colors"
               >
-                <X size={24} />
+                <X size={20} className="text-gray-400 hover:text-white" />
               </button>
             </div>
 
             {/* Modal Content */}
             <div className="p-6">
-              {/* Current/Preview Image */}
+              {/* Preview Image */}
               <div className="text-center mb-6">
-                <div className="w-64 h-64 mx-auto rounded-full overflow-hidden border-4 border-teal-400 shadow-2xl">
-                  {previewImage || userAuth.profile ? (
+                <div className="w-48 h-48 mx-auto rounded-full overflow-hidden border-4 border-teal-400 shadow-xl">
+                  {previewImage || userAuth?.profile ? (
                     <img
                       src={previewImage || userAuth.profile}
                       alt="Profile Preview"
@@ -248,10 +256,13 @@ const Profile = () => {
                       className="w-full h-full flex items-center justify-center"
                       style={{ backgroundColor: '#25D366' }}
                     >
-                      <User size={80} className="text-white" />
+                      <User size={72} className="text-white" />
                     </div>
                   )}
                 </div>
+                <p className="text-gray-400 text-sm mt-3">
+                  {previewImage ? 'Preview of your new picture' : 'Current profile picture'}
+                </p>
               </div>
 
               {/* Upload Section */}
@@ -262,48 +273,75 @@ const Profile = () => {
                     accept="image/*"
                     onChange={handleImageUpload}
                     className="hidden"
+                    disabled={uploading}
                   />
                   <div
-                    className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-teal-400 hover:bg-opacity-10 transition-colors"
-                    style={{ borderColor: '#4a4a4a', backgroundColor: 'rgba(37, 211, 102, 0.05)' }}
+                    className="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer hover:border-teal-400 transition-all duration-200"
+                    style={{ 
+                      borderColor: uploading ? '#6B7280' : '#4a4a4a', 
+                      backgroundColor: 'rgba(37, 211, 102, 0.05)',
+                      cursor: uploading ? 'not-allowed' : 'pointer'
+                    }}
                   >
-                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-300">
-                      Click to upload or drag and drop
-                    </p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      PNG, JPG up to 5MB
-                    </p>
+                    {uploading ? (
+                      <div className="flex flex-col items-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-400 mb-4"></div>
+                        <p className="text-gray-300">Processing image...</p>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="w-10 h-10 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-300 mb-2">Click to upload or drag and drop</p>
+                        <p className="text-sm text-gray-500">PNG, JPG up to 5MB</p>
+                      </>
+                    )}
                   </div>
                 </label>
 
                 {/* Action Buttons */}
-                <div className="flex space-x-4 pt-4">
+                <div className="flex space-x-4">
                   <button
                     onClick={saveProfilePicture}
                     disabled={!previewImage || uploading}
-                    className="flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg font-medium text-white transition-all duration-200"
+                    className="flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-xl font-medium text-white transition-all duration-200 disabled:cursor-not-allowed"
                     style={{
-                      backgroundColor: (!previewImage || uploading) ? '#4a4a4a' : '#25D366',
-                      cursor: (!previewImage || uploading) ? 'not-allowed' : 'pointer'
+                      backgroundColor: (!previewImage || uploading) ? '#4a4a4a' : '#25D366'
                     }}
                   >
-                    <CheckCircle size={20} />
-                    <span>{uploading ? 'Saving...' : 'Save Picture'}</span>
+                    {uploading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle size={18} />
+                        <span>Save Picture</span>
+                      </>
+                    )}
                   </button>
 
                   <button
-                    disabled={!previewImage || uploading}
                     onClick={() => {
                       setShowImageModal(false)
                       setPreviewImage(null)
                     }}
-                    className="flex-1 py-3 px-4 border border-gray-600 rounded-lg font-medium text-gray-300 hover:bg-gray-700 transition-colors"
+                    disabled={uploading}
+                    className="flex-1 py-3 px-4 border-2 border-gray-600 rounded-xl font-medium text-gray-300 hover:bg-gray-700 hover:border-gray-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Cancel
                   </button>
                 </div>
 
+                {/* Tips Section */}
+                <div className="mt-6 p-4 bg-gray-800 bg-opacity-50 rounded-xl">
+                  <h4 className="text-white font-medium text-sm mb-2">Tips:</h4>
+                  <ul className="text-gray-400 text-xs space-y-1">
+                    <li>• Use a square image for best results</li>
+                    <li>• Minimum 400x400px recommended</li>
+                    <li>• Good lighting works best</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

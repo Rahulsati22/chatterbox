@@ -7,6 +7,68 @@ const NoChatSelected = () => {
       className="flex-1 flex items-center justify-center px-4"
       style={{ backgroundColor: '#0B141A' }}
     >
+      {/* Add the CSS styles to the head */}
+      <style>{`
+        @keyframes breathe {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+
+        @keyframes glow {
+          0% { box-shadow: 0 0 20px rgba(37, 211, 102, 0.3); }
+          100% { box-shadow: 0 0 30px rgba(37, 211, 102, 0.6), 0 0 40px rgba(37, 211, 102, 0.3); }
+        }
+
+        @keyframes rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        @keyframes iconPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+        }
+
+        @keyframes ripple {
+          0% { transform: scale(1); opacity: 0.3; }
+          50% { opacity: 0.1; }
+          100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        @keyframes slideInLeft {
+          0% { transform: translateX(-10px); opacity: 0.05; }
+          100% { transform: translateX(0px); opacity: 0.1; }
+        }
+
+        @keyframes slideInRight {
+          0% { transform: translateX(10px); opacity: 0.05; }
+          100% { transform: translateX(0px); opacity: 0.1; }
+        }
+
+        @keyframes floatParticle {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          25% { transform: translateY(-15px) translateX(5px); }
+          50% { transform: translateY(-10px) translateX(-5px); }
+          75% { transform: translateY(-20px) translateX(3px); }
+        }
+
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
+
       <div className="text-center max-w-sm">
         {/* Animated Illustration */}
         <div className="w-48 h-48 mx-auto mb-6 relative">
@@ -143,68 +205,6 @@ const NoChatSelected = () => {
             <div className="w-8 h-px bg-gray-600" />
           </div>
         </div>
-
-        {/* CSS Animations */}
-        <style jsx>{`
-          @keyframes breathe {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-          }
-
-          @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-          }
-
-          @keyframes glow {
-            0% { box-shadow: 0 0 20px rgba(37, 211, 102, 0.3); }
-            100% { box-shadow: 0 0 30px rgba(37, 211, 102, 0.6), 0 0 40px rgba(37, 211, 102, 0.3); }
-          }
-
-          @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-
-          @keyframes iconPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-          }
-
-          @keyframes ripple {
-            0% { transform: scale(1); opacity: 0.3; }
-            50% { opacity: 0.1; }
-            100% { transform: scale(1.5); opacity: 0; }
-          }
-
-          @keyframes slideInLeft {
-            0% { transform: translateX(-10px); opacity: 0.05; }
-            100% { transform: translateX(0px); opacity: 0.1; }
-          }
-
-          @keyframes slideInRight {
-            0% { transform: translateX(10px); opacity: 0.05; }
-            100% { transform: translateX(0px); opacity: 0.1; }
-          }
-
-          @keyframes floatParticle {
-            0%, 100% { transform: translateY(0px) translateX(0px); }
-            25% { transform: translateY(-15px) translateX(5px); }
-            50% { transform: translateY(-10px) translateX(-5px); }
-            75% { transform: translateY(-20px) translateX(3px); }
-          }
-
-          @keyframes fadeInUp {
-            from {
-              opacity: 0;
-              transform: translateY(20px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `}</style>
       </div>
     </div>
   )

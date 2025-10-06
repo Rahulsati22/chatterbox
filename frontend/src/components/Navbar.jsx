@@ -78,11 +78,14 @@ const Navbar = () => {
     }
 
     return (
-        <nav className="navbar-container" style={{
-            background: 'linear-gradient(to right, #075E54, #128C7E)',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            borderBottom: '1px solid rgba(18, 140, 126, 0.3)'
-        }}>
+        <nav 
+            className="navbar-container fixed top-0 left-0 right-0 z-[9999]" // Added fixed positioning and highest z-index
+            style={{
+                background: 'linear-gradient(to right, #075E54, #128C7E)',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                borderBottom: '1px solid rgba(18, 140, 126, 0.3)'
+            }}
+        >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
@@ -159,9 +162,9 @@ const Navbar = () => {
                                             />
                                         </button>
 
-                                        {/* Profile Dropdown Menu - Enhanced with Bigger Image */}
+                                        {/* Profile Dropdown Menu - Enhanced with Higher z-index */}
                                         {profileDropdown && (
-                                            <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
+                                            <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-[10000] overflow-hidden"> {/* Increased z-index */}
                                                 {/* User Info Header with Big Image */}
                                                 <div className="px-6 py-6 text-center" style={{
                                                     background: 'linear-gradient(135deg, #DCF8C6 0%, #B8E6B8 100%)'
@@ -283,11 +286,11 @@ const Navbar = () => {
                         </div>
                     </div>
 
-                    {/* Mobile menu button */}
-                    <div className="md:hidden">
+                    {/* Mobile menu button - Enhanced z-index */}
+                    <div className="md:hidden relative z-[10001]"> {/* Higher z-index for button */}
                         <button
                             onClick={toggleMenu}
-                            className="text-gray-100 hover:text-white hover:bg-black hover:bg-opacity-20 p-2 rounded-lg transition-all duration-200"
+                            className="text-gray-100 hover:text-white hover:bg-black hover:bg-opacity-20 p-2 rounded-lg transition-all duration-200 relative z-[10001]"
                         >
                             {isOpen ? <X size={24} /> : <Menu size={24} />}
                         </button>
@@ -295,9 +298,11 @@ const Navbar = () => {
                 </div>
             </div>
 
-            {/* Mobile Navigation Menu */}
+            {/* Mobile Navigation Menu - Enhanced with proper z-index */}
             <div
-                className={`md:hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'} overflow-hidden border-t border-white border-opacity-20`}
+                className={`md:hidden absolute left-0 right-0 top-16 transition-all duration-300 ease-in-out z-[9998] ${
+                    isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+                } overflow-hidden border-t border-white border-opacity-20`}
                 style={{ backgroundColor: '#128C7E' }}
             >
                 <div className="px-4 pt-2 pb-4 space-y-2">
@@ -354,7 +359,7 @@ const Navbar = () => {
                         onClick={handleSettingsClick}
                         className="flex items-center space-x-3 text-gray-100 hover:text-white hover:bg-black hover:bg-opacity-30 px-3 py-3 rounded-lg transition-all duration-200 w-full"
                     >
-                        <Settings size={20} />
+                        <Gamepad size={20} />
                         <span>Games</span>
                     </Link>
 

@@ -19,23 +19,17 @@ const App = () => {
   const { userAuth, checkingAuth, checkAuth } = useUserStore()
   const { getUsers } = useChatStore()
   useEffect(() => {
-    async function func() {
-      await checkAuth()
-    }
-    func()
-  }, [])
+    checkAuth()
+  }, [checkAuth])
 
   useEffect(() => {
-    async function func() {
-      getUsers()
-    }
-    func()
-  }, [])
+    userAuth && getUsers()
+  }, [getUsers, userAuth])
 
   return (
     checkingAuth ? <Loader /> : <BrowserRouter>
       <div className="min-h-screen" style={{ backgroundColor: '#ECE5DD' }}>
-        <Navbar />
+        {userAuth && <Navbar />}
         <main>
           <Routes>
             <Route path='/' element={userAuth ? <HomePage /> : <Navigate to='/signin' />} />

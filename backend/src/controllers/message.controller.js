@@ -1,6 +1,8 @@
 import Message from "../models/Message.js"
 import User from "../models/User.js"
 import cloudinary from "../lib/cloudinary.js"
+import { getReceiverSocketId, io } from "../lib/socket.js"
+
 
 
 //function to get all the users
@@ -67,23 +69,31 @@ export const sendMessage = async (req, res) => {
 
         let imageUrl;
         if (image) {
-            // console.log(image)
+
             const cloudinary_url = await cloudinary.uploader.upload(image, {
                 folder: "chats"
             })
             imageUrl = cloudinary_url.secure_url
         }
 
+        let newMessage;
         if (message && imageUrl)
-            await Message.create({ image: imageUrl, text: message, senderId: req.user._id, receiverId })
+            newMessage = await Message.create({ image: imageUrl, text: message, senderId: req.user._id, receiverId })
         else if (message)
-            await Message.create({ text: message, senderId: req.user._id, receiverId })
+            newMessage = await Message.create({ text: message, senderId: req.user._id, receiverId })
         else if (imageUrl)
-            await Message.create({ image: imageUrl, senderId: req.user._id, receiverId })
+            newMessage = await Message.create({ image: imageUrl, senderId: req.user._id, receiverId })
 
-        //real time message logic using socket.io
+        //real time message logic using socket.io //hum receiver ki id nikalenge and then hum emit kr denge message to the receiver
+        //and in frontend with the help of socket.on we can get the message from the sender that is req.user._id
+        // if (userSocketMap[receiverId]) {
+        //     io.to(userSocketMap[receiverId]).emit("newMessage", newMessage)
+        // }
 
-
+        const receiverSocketId = getReceiverSocketId(receiverId)
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("newMessage", newMessage)
+        }
 
 
         const messageAll = await Message.find({ $or: [{ senderId: req.user._id, receiverId: req.params.id }, { senderId: req.params.id, receiverId: req.user._id }] })

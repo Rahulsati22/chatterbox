@@ -6,6 +6,7 @@ import cors from 'cors'
 import { connectDb } from './lib/db.js'
 import authRouter from './router/authRoutes.routes.js'
 import messageRouter from './router/messageRoutes.routes.js'
+import { app, server} from './lib/socket.js'
 //import various things in our project
 
 
@@ -21,9 +22,7 @@ dotenv.config()
 
 
 
-
-const app = express()
-
+ 
 
 
 
@@ -74,7 +73,7 @@ app.use("/api/message", messageRouter)
 
 
 //here we are listening on port
-app.listen(process.env.PORT, () => {
+server.listen(process.env.PORT, () => {
     console.log('listening on port', process.env.PORT)
 })
 //here we are listening on port

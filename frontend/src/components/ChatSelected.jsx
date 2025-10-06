@@ -8,13 +8,13 @@ import { useChatStore } from '../stores/useChatStore'
 import { useUserStore } from '../stores/useUserStore'
 
 const ChatSelected = ({ onBackClick }) => {
-    const { messages, getMessages, selectedUser, sendMessage, isMessagesLoading } = useChatStore()
+    const { messages, getMessages, selectedUser, sendMessage, isMessagesLoading, subscribeToMessage, unsubscribeFromMessage } = useChatStore()
     const { userAuth } = useUserStore()
     const [message, setMessage] = useState('')
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
     const [selectedImage, setSelectedImage] = useState(null)
     const [imagePreview, setImagePreview] = useState(null)
-    const [isSending, setIsSending] = useState(false) // Add sending state
+    const [isSending, setIsSending] = useState(false)
     const messagesEndRef = useRef(null)
     const fileInputRef = useRef(null)
 
@@ -32,7 +32,9 @@ const ChatSelected = ({ onBackClick }) => {
     useEffect(() => {
         if (selectedUser?._id) {
             getMessages(selectedUser._id)
+            subscribeToMessage()
         }
+        return ()=>unsubscribeFromMessage()
     }, [selectedUser, getMessages])
 
     // Auto scroll to bottom when new messages arrive
@@ -102,7 +104,6 @@ const ChatSelected = ({ onBackClick }) => {
             }
         } catch (error) {
             console.error('Error sending message:', error)
-            // You can show error toast here
         } finally {
             setIsSending(false) // End sending
         }
@@ -205,7 +206,7 @@ const ChatSelected = ({ onBackClick }) => {
                     backgroundSize: '30px 30px'
                 }}
             >
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {isMessagesLoading ? (
                         <div className="flex items-center justify-center py-8">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
@@ -217,8 +218,29 @@ const ChatSelected = ({ onBackClick }) => {
                             return (
                                 <div
                                     key={msg._id}
-                                    className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}
+                                    className={`flex items-start space-x-3 ${isMyMessage ? 'justify-end' : 'justify-start'}`}
                                 >
+                                    {/* Left side profile picture for other user's messages */}
+                                    {!isMyMessage && (
+                                        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                                            {selectedUser?.profile ? (
+                                                <img
+                                                    src={selectedUser.profile}
+                                                    alt={selectedUser.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <div
+                                                    className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                                                    style={{ backgroundColor: '#25D366' }}
+                                                >
+                                                    {selectedUser?.name?.charAt(0).toUpperCase() || 'U'}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Message Bubble */}
                                     <div
                                         className={`max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg px-4 py-3 rounded-2xl shadow-sm ${isMyMessage ? 'rounded-br-md' : 'rounded-bl-md'
                                             }`}
@@ -235,6 +257,7 @@ const ChatSelected = ({ onBackClick }) => {
                                                     alt="Shared image"
                                                     className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                                                     onClick={() => window.open(msg.image, '_blank')}
+                                                    style={{ maxHeight: '300px', objectFit: 'cover' }}
                                                 />
                                                 {msg.text && (
                                                     <p className="text-sm leading-relaxed break-words mt-2">
@@ -258,6 +281,26 @@ const ChatSelected = ({ onBackClick }) => {
                                             )}
                                         </div>
                                     </div>
+
+                                    {/* Right side profile picture for my messages */}
+                                    {isMyMessage && (
+                                        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                                            {userAuth?.profile ? (
+                                                <img
+                                                    src={userAuth.profile}
+                                                    alt="My Profile"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <div
+                                                    className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                                                    style={{ backgroundColor: '#25D366' }}
+                                                >
+                                                    {userAuth?.name?.charAt(0).toUpperCase() || 'Y'}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             )
                         })

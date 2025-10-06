@@ -16,7 +16,6 @@ export const register = async (req, res) => {
         })
         const salt = await bcrypt.genSalt(10)
         const newPassword = await bcrypt.hash(password, salt)
-        console.log(newPassword)
         const user = await User.create({ name, email, password: newPassword, profile: cloudinary_url.secure_url })
         if (!user) return res.status(400).json({ message: "user not created" })
 

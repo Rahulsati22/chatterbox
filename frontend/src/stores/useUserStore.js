@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { axios2 } from '../lib/axios'
 import { toast } from 'react-hot-toast'
+import { io } from 'socket.io-client'
 
 
 const useUserStore = create((set, get) => ({
@@ -8,17 +9,19 @@ const useUserStore = create((set, get) => ({
     signuploading: false,
     signinloading: false,
     checkingAuth: true,
-    onlineUsers : [],
+    onlineUsers: [],
+    socket: null,
 
     signup: async ({ name, email, password, image }) => {
         try {
             set({ signuploading: true })
             const response = await axios2.post('/auth/register', { name, email, password, image })
-            console.log(response.data)
+
             set({ signuploading: false })
             //setting user auth here
             set({ userAuth: response.data.user })
             toast.success('account created successfully')
+            get().connectSocket()
         } catch (error) {
             set({ signuploading: false })
             console.log('error in signup function', error.message)
@@ -35,6 +38,7 @@ const useUserStore = create((set, get) => ({
             set({ userAuth: response.data.user })
             set({ signinloading: false })
             toast.success('account logged in successfully')
+            get().connectSocket()
         } catch (error) {
             set({ signinloading: false })
             console.log('error in signup function', error)
@@ -47,6 +51,7 @@ const useUserStore = create((set, get) => ({
         try {
             const response = await axios2.get('/auth/checkauth')
             set({ userAuth: response.data.user })
+            get().connectSocket()
         } catch (error) {
             set({ userAuth: null })
             console.log("error in checkAuth")
@@ -60,6 +65,7 @@ const useUserStore = create((set, get) => ({
             await axios2.post('/auth/logout')
             set({ userAuth: null })
             toast.success('account logged out successfully')
+            get().disconnectSocket()
         } catch (error) {
             console.log("error in logout")
             toast.error(error.message || 'something went wrong')
@@ -75,6 +81,26 @@ const useUserStore = create((set, get) => ({
             console.log("error in saving profile")
             toast.error(error.response.data.message || 'something went wrong')
         }
+    },
+
+    connectSocket: async () => {
+        const { userAuth } = get()
+        if (!userAuth || get().socket?.connected) return
+        const socket = io("http://localhost:3000", {
+            query: {
+                userId: userAuth._id
+            }
+        })
+        socket.connect()
+        set({ socket: socket })
+
+        socket.on("getOnlineUsers", (users) => {
+            set({ onlineUsers: users })
+        })
+    },
+    disconnectSocket: async () => {
+        if (!get().socket?.connected) return
+        get().socket.disconnect()
     }
 }))
 

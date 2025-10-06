@@ -8,7 +8,7 @@ export const protectRoute = async (req, res, next) => {
             return res.status(401).json({ message: "unauthorized" })
 
         const user = await User.findById(userId).select("-password")
-        console.log(user)
+        
         if (!user)
             return res.status(401).json({ message: "unauthorized" })
         req.user = user

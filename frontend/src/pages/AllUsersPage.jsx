@@ -37,13 +37,7 @@ const AllUsersPage = () => {
   }
 
   // Check if user is online (mock logic - replace with real logic)
-  const isUserOnline = (user) => {
-    // Mock: randomly assign online status or use updatedAt to determine
-    const now = new Date()
-    const userLastSeen = new Date(user.updatedAt)
-    const diffInMinutes = Math.floor((now - userLastSeen) / (1000 * 60))
-    return diffInMinutes < 5 // Online if last seen within 5 minutes
-  }
+   
 
   // Filter users based on search
   const filteredUsers = allUsers?.filter(user =>
