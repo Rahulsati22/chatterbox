@@ -6,10 +6,14 @@ import cors from 'cors'
 import { connectDb } from './lib/db.js'
 import authRouter from './router/authRoutes.routes.js'
 import messageRouter from './router/messageRoutes.routes.js'
-import { app, server} from './lib/socket.js'
+import { app, server } from './lib/socket.js'
+
+import path from 'path'
 //import various things in our project
 
 
+
+const __dirname = path.resolve()
 
 
 //using dotenv in our project
@@ -22,7 +26,7 @@ dotenv.config()
 
 
 
- 
+
 
 
 
@@ -66,6 +70,13 @@ app.use("/api/auth", authRouter)
 app.use("/api/message", messageRouter)
 //here we are using the authRouter
 
+
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "../frontend/dist")))
+    app.get("*", (req, res) => {
+        res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"))
+    })
+}
 
 
 
