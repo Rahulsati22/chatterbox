@@ -173,7 +173,7 @@ const HomePage = () => {
                 </>
               ) : (
                 <Link
-                  to="/chat"
+                  to="/users"
                   className="bg-white text-green-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all duration-200 flex items-center space-x-2 shadow-xl hover:scale-105"
                 >
                   <MessageCircle className="w-5 h-5" />
@@ -358,7 +358,7 @@ const HomePage = () => {
             </div>
           ) : (
             <Link
-              to="/chat"
+              to="/users"
               className="bg-white text-green-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all duration-200 inline-flex items-center space-x-2 shadow-xl hover:scale-105"
             >
               <MessageCircle className="w-5 h-5" />

@@ -15,84 +15,21 @@ const ChatSelected = ({ onBackClick }) => {
     const [selectedImage, setSelectedImage] = useState(null)
     const [imagePreview, setImagePreview] = useState(null)
     const [isSending, setIsSending] = useState(false)
-    const [keyboardVisible, setKeyboardVisible] = useState(false)
-    const [initialViewportHeight, setInitialViewportHeight] = useState(window.visualViewport?.height || window.innerHeight)
     
     const messagesEndRef = useRef(null)
     const fileInputRef = useRef(null)
     const messageInputRef = useRef(null)
-    const chatContainerRef = useRef(null)
+    const messagesContainerRef = useRef(null)
 
-    // Handle viewport changes for keyboard detection
+    // Check if mobile device
     useEffect(() => {
-        const handleViewportChange = () => {
-            const currentHeight = window.visualViewport?.height || window.innerHeight
-            const threshold = initialViewportHeight * 0.75
-            
-            setKeyboardVisible(currentHeight < threshold)
-        }
-
         const handleResize = () => {
             setIsMobile(window.innerWidth < 768)
-            if (!keyboardVisible) {
-                setInitialViewportHeight(window.visualViewport?.height || window.innerHeight)
-            }
-        }
-
-        // Visual Viewport API support (better for keyboard detection)
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', handleViewportChange)
-        } else {
-            window.addEventListener('resize', handleViewportChange)
         }
 
         window.addEventListener('resize', handleResize)
-
-        return () => {
-            if (window.visualViewport) {
-                window.visualViewport.removeEventListener('resize', handleViewportChange)
-            } else {
-                window.removeEventListener('resize', handleViewportChange)
-            }
-            window.removeEventListener('resize', handleResize)
-        }
-    }, [initialViewportHeight, keyboardVisible])
-
-    // Prevent body scroll when keyboard is visible
-    useEffect(() => {
-        if (isMobile && keyboardVisible) {
-            document.body.style.overflow = 'hidden'
-            document.body.style.position = 'fixed'
-            document.body.style.width = '100%'
-            document.body.style.height = '100%'
-        } else {
-            document.body.style.overflow = ''
-            document.body.style.position = ''
-            document.body.style.width = ''
-            document.body.style.height = ''
-        }
-
-        return () => {
-            document.body.style.overflow = ''
-            document.body.style.position = ''
-            document.body.style.width = ''
-            document.body.style.height = ''
-        }
-    }, [isMobile, keyboardVisible])
-
-    // Handle input focus with scroll prevention
-    const handleInputFocus = () => {
-        if (isMobile) {
-            setTimeout(() => {
-                scrollToBottom()
-                // Ensure input stays visible
-                messageInputRef.current?.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'end' 
-                })
-            }, 300)
-        }
-    }
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
 
     // Get messages when selectedUser changes
     useEffect(() => {
@@ -110,6 +47,22 @@ const ChatSelected = ({ onBackClick }) => {
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    }
+
+    // Handle input focus - scroll to bottom with delay for keyboard animation
+    const handleInputFocus = () => {
+        if (isMobile) {
+            // Multiple attempts to scroll after keyboard appears
+            setTimeout(() => scrollToBottom(), 100)
+            setTimeout(() => scrollToBottom(), 300)
+            setTimeout(() => scrollToBottom(), 600)
+            setTimeout(() => {
+                messageInputRef.current?.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'nearest' 
+                })
+            }, 800)
+        }
     }
 
     // Format time
@@ -165,13 +118,6 @@ const ChatSelected = ({ onBackClick }) => {
                 await sendMessage(selectedUser._id, message.trim())
                 setMessage('')
             }
-            
-            // Refocus input after sending
-            if (isMobile) {
-                setTimeout(() => {
-                    messageInputRef.current?.focus()
-                }, 100)
-            }
         } catch (error) {
             console.error('Error sending message:', error)
         } finally {
@@ -210,318 +156,334 @@ const ChatSelected = ({ onBackClick }) => {
     }
 
     return (
-        <div
-            ref={chatContainerRef}
-            className="h-full w-full flex flex-col relative"
-            style={{
-                backgroundColor: '#0B141A',
-                minHeight: '0',
-                maxHeight: '100%',
-                // Adjust height when keyboard is visible
-                ...(isMobile && keyboardVisible && {
-                    height: `${window.visualViewport?.height || window.innerHeight}px`,
-                    maxHeight: `${window.visualViewport?.height || window.innerHeight}px`
-                })
-            }}
-        >
-            {/* Chat Header */}
+        <>
+            {/* CSS for mobile keyboard fix */}
+            <style>{`
+                /* Use dynamic viewport height */
+                .chat-container {
+                    height: 100dvh;
+                    max-height: 100dvh;
+                }
+                
+                /* Fallback for older browsers */
+                @supports not (height: 100dvh) {
+                    .chat-container {
+                        height: 100vh;
+                        max-height: 100vh;
+                    }
+                }
+                
+                /* Force proper scrolling on mobile */
+                @media (max-width: 768px) {
+                    .messages-container {
+                        overflow-y: auto;
+                        -webkit-overflow-scrolling: touch;
+                        overscroll-behavior: contain;
+                    }
+                    
+                    /* Ensure input area stays visible */
+                    .input-area {
+                        position: sticky;
+                        bottom: 0;
+                        background: #202C33;
+                        z-index: 1000;
+                    }
+                }
+            `}</style>
+
             <div
-                className="flex-shrink-0 flex items-center justify-between p-4 border-b border-gray-700"
-                style={{ backgroundColor: '#202C33' }}
-            >
-                <div className="flex items-center space-x-3">
-                    {isMobile && (
-                        <button
-                            onClick={handleBack}
-                            disabled={isSending}
-                            className={`p-1 hover:bg-gray-600 rounded-full transition-colors mr-2 ${
-                                isSending ? 'opacity-50 cursor-not-allowed' : ''
-                            }`}
-                        >
-                            <ArrowLeft size={20} className="text-white" />
-                        </button>
-                    )}
-
-                    {/* User Avatar */}
-                    <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                        {selectedUser.profile ? (
-                            <img
-                                src={selectedUser.profile}
-                                alt={selectedUser.name}
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <div
-                                className="w-full h-full flex items-center justify-center text-white font-semibold"
-                                style={{ backgroundColor: '#25D366' }}
-                            >
-                                {selectedUser.name?.charAt(0).toUpperCase() || 'U'}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* User Info */}
-                    <div className="min-w-0">
-                        <h3 className="text-white font-medium truncate">
-                            {selectedUser.name || 'Unknown User'}
-                        </h3>
-                        {isSending && (
-                            <p className="text-xs text-green-400 animate-pulse">
-                                Sending...
-                            </p>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* Messages Container - Adjust height based on keyboard visibility */}
-            <div
-                className="flex-1 overflow-y-auto px-4 py-6"
+                className="chat-container w-full flex flex-col"
                 style={{
-                    minHeight: '0',
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-                    backgroundSize: '30px 30px',
-                    // Reduce padding when keyboard is visible
-                    ...(isMobile && keyboardVisible && {
-                        paddingBottom: '1rem',
-                        paddingTop: '1rem'
-                    })
+                    backgroundColor: '#0B141A',
+                    minHeight: '0'
                 }}
             >
-                <div className="space-y-4">
-                    {isMessagesLoading ? (
-                        <div className="flex items-center justify-center py-8">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
-                        </div>
-                    ) : messages && messages.length > 0 ? (
-                        messages.map((msg) => {
-                            const isMyMessage = msg.senderId === userAuth?._id
+                {/* Chat Header */}
+                <div
+                    className="flex-shrink-0 flex items-center justify-between p-4 border-b border-gray-700"
+                    style={{ backgroundColor: '#202C33' }}
+                >
+                    <div className="flex items-center space-x-3">
+                        {isMobile && (
+                            <button
+                                onClick={handleBack}
+                                disabled={isSending}
+                                className={`p-1 hover:bg-gray-600 rounded-full transition-colors mr-2 ${
+                                    isSending ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                            >
+                                <ArrowLeft size={20} className="text-white" />
+                            </button>
+                        )}
 
-                            return (
+                        {/* User Avatar */}
+                        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                            {selectedUser.profile ? (
+                                <img
+                                    src={selectedUser.profile}
+                                    alt={selectedUser.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
                                 <div
-                                    key={msg._id}
-                                    className={`flex items-start space-x-3 ${isMyMessage ? 'justify-end' : 'justify-start'}`}
+                                    className="w-full h-full flex items-center justify-center text-white font-semibold"
+                                    style={{ backgroundColor: '#25D366' }}
                                 >
-                                    {/* Left side profile picture for other user's messages */}
-                                    {!isMyMessage && (
-                                        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                                            {selectedUser?.profile ? (
-                                                <img
-                                                    src={selectedUser.profile}
-                                                    alt={selectedUser.name}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <div
-                                                    className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                                                    style={{ backgroundColor: '#25D366' }}
-                                                >
-                                                    {selectedUser?.name?.charAt(0).toUpperCase() || 'U'}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
+                                    {selectedUser.name?.charAt(0).toUpperCase() || 'U'}
+                                </div>
+                            )}
+                        </div>
 
-                                    {/* Message Bubble */}
+                        {/* User Info */}
+                        <div className="min-w-0">
+                            <h3 className="text-white font-medium truncate">
+                                {selectedUser.name || 'Unknown User'}
+                            </h3>
+                            {isSending && (
+                                <p className="text-xs text-green-400 animate-pulse">
+                                    Sending...
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Messages Container - Updated with proper flex and scroll */}
+                <div
+                    ref={messagesContainerRef}
+                    className="messages-container flex-1 px-4 py-6"
+                    style={{
+                        minHeight: '0',
+                        overflowY: 'auto',
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+                        backgroundSize: '30px 30px'
+                    }}
+                >
+                    <div className="space-y-4">
+                        {isMessagesLoading ? (
+                            <div className="flex items-center justify-center py-8">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                            </div>
+                        ) : messages && messages.length > 0 ? (
+                            messages.map((msg) => {
+                                const isMyMessage = msg.senderId === userAuth?._id
+
+                                return (
                                     <div
-                                        className={`max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg px-4 py-3 rounded-2xl shadow-sm ${
-                                            isMyMessage ? 'rounded-br-md' : 'rounded-bl-md'
-                                        }`}
-                                        style={{
-                                            backgroundColor: isMyMessage ? '#005C4B' : '#202C33',
-                                            color: 'white'
-                                        }}
+                                        key={msg._id}
+                                        className={`flex items-start space-x-3 ${isMyMessage ? 'justify-end' : 'justify-start'}`}
                                     >
-                                        {/* Handle both text and image messages */}
-                                        {msg.image ? (
-                                            <div className="mb-2">
-                                                <img
-                                                    src={msg.image}
-                                                    alt="Shared image"
-                                                    className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                                                    onClick={() => window.open(msg.image, '_blank')}
-                                                    style={{ maxHeight: '300px', objectFit: 'cover' }}
-                                                />
-                                                {msg.text && (
-                                                    <p className="text-sm leading-relaxed break-words mt-2">
-                                                        {msg.text}
-                                                    </p>
+                                        {/* Left side profile picture for other user's messages */}
+                                        {!isMyMessage && (
+                                            <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                                                {selectedUser?.profile ? (
+                                                    <img
+                                                        src={selectedUser.profile}
+                                                        alt={selectedUser.name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div
+                                                        className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                                                        style={{ backgroundColor: '#25D366' }}
+                                                    >
+                                                        {selectedUser?.name?.charAt(0).toUpperCase() || 'U'}
+                                                    </div>
                                                 )}
                                             </div>
-                                        ) : (
-                                            <p className="text-sm leading-relaxed break-words">
-                                                {msg.text}
-                                            </p>
                                         )}
 
-                                        {/* Time and Status */}
-                                        <div className="flex items-center justify-end mt-2 space-x-1">
-                                            <span className="text-xs opacity-70">
-                                                {formatTime(msg.createdAt)}
-                                            </span>
-                                            {isMyMessage && (
-                                                <CheckCheck size={14} className="opacity-70" />
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Right side profile picture for my messages */}
-                                    {isMyMessage && (
-                                        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                                            {userAuth?.profile ? (
-                                                <img
-                                                    src={userAuth.profile}
-                                                    alt="My Profile"
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <div
-                                                    className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                                                    style={{ backgroundColor: '#25D366' }}
-                                                >
-                                                    {userAuth?.name?.charAt(0).toUpperCase() || 'Y'}
+                                        {/* Message Bubble */}
+                                        <div
+                                            className={`max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg px-4 py-3 rounded-2xl shadow-sm ${
+                                                isMyMessage ? 'rounded-br-md' : 'rounded-bl-md'
+                                            }`}
+                                            style={{
+                                                backgroundColor: isMyMessage ? '#005C4B' : '#202C33',
+                                                color: 'white'
+                                            }}
+                                        >
+                                            {msg.image ? (
+                                                <div className="mb-2">
+                                                    <img
+                                                        src={msg.image}
+                                                        alt="Shared image"
+                                                        className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                                        onClick={() => window.open(msg.image, '_blank')}
+                                                        style={{ maxHeight: '300px', objectFit: 'cover' }}
+                                                    />
+                                                    {msg.text && (
+                                                        <p className="text-sm leading-relaxed break-words mt-2">
+                                                            {msg.text}
+                                                        </p>
+                                                    )}
                                                 </div>
+                                            ) : (
+                                                <p className="text-sm leading-relaxed break-words">
+                                                    {msg.text}
+                                                </p>
                                             )}
+
+                                            {/* Time and Status */}
+                                            <div className="flex items-center justify-end mt-2 space-x-1">
+                                                <span className="text-xs opacity-70">
+                                                    {formatTime(msg.createdAt)}
+                                                </span>
+                                                {isMyMessage && (
+                                                    <CheckCheck size={14} className="opacity-70" />
+                                                )}
+                                            </div>
                                         </div>
-                                    )}
+
+                                        {/* Right side profile picture for my messages */}
+                                        {isMyMessage && (
+                                            <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                                                {userAuth?.profile ? (
+                                                    <img
+                                                        src={userAuth.profile}
+                                                        alt="My Profile"
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div
+                                                        className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                                                        style={{ backgroundColor: '#25D366' }}
+                                                    >
+                                                        {userAuth?.name?.charAt(0).toUpperCase() || 'Y'}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            })
+                        ) : (
+                            <div className="flex items-center justify-center py-16 text-gray-400">
+                                <div className="text-center">
+                                    <MessageCircle size={64} className="mx-auto mb-4 opacity-30" />
+                                    <p className="text-lg mb-2">No messages yet</p>
+                                    <p className="text-sm opacity-70">Start the conversation!</p>
                                 </div>
-                            )
-                        })
-                    ) : (
-                        <div className="flex items-center justify-center py-16 text-gray-400">
-                            <div className="text-center">
-                                <MessageCircle size={64} className="mx-auto mb-4 opacity-30" />
-                                <p className="text-lg mb-2">No messages yet</p>
-                                <p className="text-sm opacity-70">Start the conversation!</p>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
+
+                    <div ref={messagesEndRef} />
                 </div>
 
-                <div ref={messagesEndRef} />
-            </div>
+                {/* Image Preview Section */}
+                {imagePreview && (
+                    <div
+                        className="flex-shrink-0 p-4 border-t border-gray-700"
+                        style={{ backgroundColor: '#1a1a1a' }}
+                    >
+                        <div className="relative inline-block">
+                            <img
+                                src={imagePreview}
+                                alt="Preview"
+                                className="max-w-xs max-h-32 rounded-lg object-cover"
+                            />
+                            <button
+                                onClick={removeSelectedImage}
+                                disabled={isSending}
+                                className={`absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors ${
+                                    isSending ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                        <p className="text-gray-400 text-sm mt-2">
+                            {isSending ? 'Sending image...' : 'Ready to send image'}
+                        </p>
+                    </div>
+                )}
 
-            {/* Image Preview Section */}
-            {imagePreview && (
+                {/* Message Input Area - Fixed with sticky positioning */}
                 <div
-                    className="flex-shrink-0 p-4 border-t border-gray-700"
-                    style={{ backgroundColor: '#1a1a1a' }}
+                    ref={messageInputRef}
+                    className="input-area flex-shrink-0 p-4 border-t border-gray-700"
+                    style={{ backgroundColor: '#202C33' }}
                 >
-                    <div className="relative inline-block">
-                        <img
-                            src={imagePreview}
-                            alt="Preview"
-                            className="max-w-xs max-h-32 rounded-lg object-cover"
-                        />
-                        <button
-                            onClick={removeSelectedImage}
+                    <div className="flex items-center space-x-3">
+                        {/* Hidden File Input */}
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileSelect}
+                            className="hidden"
                             disabled={isSending}
-                            className={`absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors ${
+                        />
+
+                        {/* Attachment Button */}
+                        <button
+                            onClick={handlePaperclipClick}
+                            disabled={isSending}
+                            className={`p-2 hover:bg-gray-600 rounded-full transition-colors flex-shrink-0 ${
                                 isSending ? 'opacity-50 cursor-not-allowed' : ''
                             }`}
+                            title={isSending ? 'Sending...' : 'Attach Image'}
                         >
-                            <X size={16} />
+                            <Paperclip size={20} className="text-gray-400 hover:text-gray-300" />
                         </button>
-                    </div>
-                    <p className="text-gray-400 text-sm mt-2">
-                        {isSending ? 'Sending image...' : 'Ready to send image'}
-                    </p>
-                </div>
-            )}
 
-            {/* Message Input Area - Fixed positioning on mobile when keyboard is visible */}
-            <div
-                className={`flex-shrink-0 p-4 border-t border-gray-700 ${
-                    isMobile && keyboardVisible ? 'relative z-50' : ''
-                }`}
-                style={{ 
-                    backgroundColor: '#202C33',
-                    // Keep input area visible when keyboard shows
-                    ...(isMobile && keyboardVisible && {
-                        position: 'sticky',
-                        bottom: 0,
-                        boxShadow: '0 -4px 8px rgba(0,0,0,0.3)'
-                    })
-                }}
-            >
-                <div className="flex items-center space-x-3">
-                    {/* Hidden File Input */}
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileSelect}
-                        className="hidden"
-                        disabled={isSending}
-                    />
+                        {/* Message Input */}
+                        <div className="flex-1 relative">
+                            <input
+                                ref={messageInputRef}
+                                type="text"
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                                onFocus={handleInputFocus}
+                                placeholder={
+                                    isSending
+                                        ? 'Sending...'
+                                        : imagePreview
+                                            ? "Add a caption..."
+                                            : "Type a message..."
+                                }
+                                disabled={isSending}
+                                className={`w-full px-4 py-3 rounded-2xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500 placeholder-gray-500 transition-all ${
+                                    isSending ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                                style={{ backgroundColor: '#2A3942' }}
+                            />
+                        </div>
 
-                    {/* Attachment Button */}
-                    <button
-                        onClick={handlePaperclipClick}
-                        disabled={isSending}
-                        className={`p-2 hover:bg-gray-600 rounded-full transition-colors flex-shrink-0 ${
-                            isSending ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                        title={isSending ? 'Sending...' : 'Attach Image'}
-                    >
-                        <Paperclip size={20} className="text-gray-400 hover:text-gray-300" />
-                    </button>
-
-                    {/* Message Input */}
-                    <div className="flex-1 relative">
-                        <input
-                            ref={messageInputRef}
-                            type="text"
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            onFocus={handleInputFocus}
-                            placeholder={
+                        {/* Send Button */}
+                        <button
+                            onClick={handleSendMessage}
+                            disabled={(!message.trim() && !selectedImage) || isSending}
+                            className={`p-3 rounded-full transition-all duration-200 flex-shrink-0 ${
+                                (message.trim() || selectedImage) && !isSending
+                                    ? 'hover:scale-105 shadow-lg'
+                                    : 'opacity-50 cursor-not-allowed'
+                            }`}
+                            style={{
+                                backgroundColor: (message.trim() || selectedImage) && !isSending ? '#25D366' : '#4a4a4a'
+                            }}
+                            title={
                                 isSending
                                     ? 'Sending...'
-                                    : imagePreview
-                                        ? "Add a caption..."
-                                        : "Type a message..."
+                                    : selectedImage
+                                        ? 'Send Image'
+                                        : 'Send Message'
                             }
-                            disabled={isSending}
-                            className={`w-full px-4 py-3 rounded-2xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500 placeholder-gray-500 transition-all ${
-                                isSending ? 'opacity-50 cursor-not-allowed' : ''
-                            }`}
-                            style={{ backgroundColor: '#2A3942' }}
-                        />
+                        >
+                            {isSending ? (
+                                <Loader size={18} className="text-white animate-spin" />
+                            ) : selectedImage ? (
+                                <ImageIcon size={18} className="text-white" />
+                            ) : (
+                                <Send size={18} className="text-white" />
+                            )}
+                        </button>
                     </div>
-
-                    {/* Send Button */}
-                    <button
-                        onClick={handleSendMessage}
-                        disabled={(!message.trim() && !selectedImage) || isSending}
-                        className={`p-3 rounded-full transition-all duration-200 flex-shrink-0 ${
-                            (message.trim() || selectedImage) && !isSending
-                                ? 'hover:scale-105 shadow-lg'
-                                : 'opacity-50 cursor-not-allowed'
-                        }`}
-                        style={{
-                            backgroundColor: (message.trim() || selectedImage) && !isSending ? '#25D366' : '#4a4a4a'
-                        }}
-                        title={
-                            isSending
-                                ? 'Sending...'
-                                : selectedImage
-                                    ? 'Send Image'
-                                    : 'Send Message'
-                        }
-                    >
-                        {isSending ? (
-                            <Loader size={18} className="text-white animate-spin" />
-                        ) : selectedImage ? (
-                            <ImageIcon size={18} className="text-white" />
-                        ) : (
-                            <Send size={18} className="text-white" />
-                        )}
-                    </button>
                 </div>
             </div>
-        </div>
+        </>
     )
 }
 
