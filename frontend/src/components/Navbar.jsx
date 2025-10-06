@@ -78,7 +78,7 @@ const Navbar = () => {
     }
 
     return (
-        <nav 
+        <nav
             className="navbar-container fixed top-0 left-0 right-0 z-[9999]" // Added fixed positioning and highest z-index
             style={{
                 background: 'linear-gradient(to right, #075E54, #128C7E)',
@@ -98,6 +98,13 @@ const Navbar = () => {
                     {/* Desktop Navigation */}
                     <div className="hidden md:block">
                         <div className="ml-10 flex items-center space-x-6">
+                            <Link
+                                to="/"
+                                className="flex items-center space-x-2 text-gray-100 hover:text-white hover:bg-black hover:bg-opacity-20 px-3 py-2 rounded-lg transition-all duration-200"
+                            >
+                                <Users size={18} />
+                                <span>Home</span>
+                            </Link>
                             <Link
                                 to="/users"
                                 className="flex items-center space-x-2 text-gray-100 hover:text-white hover:bg-black hover:bg-opacity-20 px-3 py-2 rounded-lg transition-all duration-200"
@@ -300,9 +307,8 @@ const Navbar = () => {
 
             {/* Mobile Navigation Menu - Enhanced with proper z-index */}
             <div
-                className={`md:hidden absolute left-0 right-0 top-16 transition-all duration-300 ease-in-out z-[9998] ${
-                    isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
-                } overflow-hidden border-t border-white border-opacity-20`}
+                className={`md:hidden absolute left-0 right-0 top-16 transition-all duration-300 ease-in-out z-[9998] ${isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+                    } overflow-hidden border-t border-white border-opacity-20`}
                 style={{ backgroundColor: '#128C7E' }}
             >
                 <div className="px-4 pt-2 pb-4 space-y-2">
@@ -342,6 +348,16 @@ const Navbar = () => {
                             </div>
                         </div>
                     )}
+
+
+                    <Link
+                        onClick={handleAllUsersClick}
+                        to="/"
+                        className="flex items-center space-x-3 text-gray-100 hover:text-white hover:bg-black hover:bg-opacity-30 px-3 py-3 rounded-lg transition-all duration-200 w-full"
+                    >
+                        <Users size={20} />
+                        <span>Home</span>
+                    </Link>
 
                     {/* All Users Link */}
                     <Link
