@@ -41,9 +41,9 @@ export const useChatStore = create((set, get) => ({
     //todo update later
     setSelectedUser: async (selectedUser) => { set({ selectedUser: selectedUser }) },
 
-    sendMessage : async (id, message)=>{
+    sendMessage : async (id, message, selectedImage)=>{
         try {
-            const response = await axios2.post(`/message/sendmessages/${id}`, {message})
+            const response = await axios2.post(`/message/sendmessages/${id}`, {message, image:selectedImage})
             set({messages : response.data.messages})
         } catch (error) {
             console.log('error while sending message', error)

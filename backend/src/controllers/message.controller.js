@@ -1,5 +1,6 @@
 import Message from "../models/Message.js"
 import User from "../models/User.js"
+import cloudinary from "../lib/cloudinary.js"
 
 
 //function to get all the users
@@ -59,28 +60,32 @@ export const getMessages = async (req, res) => {
 export const sendMessage = async (req, res) => {
     try {
         const { message, image } = req.body
-        if (!message) return res.status(400).json({ message: "message is required" })
+        if (!message && !image) return res.status(400).json({ message: "message is required" })
 
         const receiverId = req.params.id
         if (!receiverId) return res.status(400).json({ message: "receiver id is required" })
 
         let imageUrl;
         if (image) {
+            // console.log(image)
             const cloudinary_url = await cloudinary.uploader.upload(image, {
                 folder: "chats"
             })
             imageUrl = cloudinary_url.secure_url
         }
 
-
-        const messages = await Message.create({ image: imageUrl, text: message, senderId: req.user._id, receiverId })
-
+        if (message && imageUrl)
+            await Message.create({ image: imageUrl, text: message, senderId: req.user._id, receiverId })
+        else if (message)
+            await Message.create({ text: message, senderId: req.user._id, receiverId })
+        else if (imageUrl)
+            await Message.create({ image: imageUrl, senderId: req.user._id, receiverId })
 
         //real time message logic using socket.io
 
 
 
-        
+
         const messageAll = await Message.find({ $or: [{ senderId: req.user._id, receiverId: req.params.id }, { senderId: req.params.id, receiverId: req.user._id }] })
         return res.status(200).json({ messages: messageAll, message: "message sent successfully" })
     } catch (error) {
